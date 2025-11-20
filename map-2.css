@@ -1,0 +1,24 @@
+/* Estilos customizados para o Leaflet */
+
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
