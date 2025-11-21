@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { ItineraryItem } from "@/lib/types";
-import { MapPin } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 // Fix para os ícones do Leaflet
@@ -37,6 +37,36 @@ export default function TripMap({ items }: TripMapProps) {
   const routeCoordinates: [number, number][] = items
     .sort((a, b) => a.order - b.order)
     .map(item => [item.location.lat, item.location.lng]);
+
+  // Função para gerar link do Google Maps com rota
+  const generateGoogleMapsUrl = () => {
+    if (items.length === 0) return "#";
+
+    const sortedItems = [...items].sort((a, b) => a.order - b.order);
+    
+    // Origem (primeiro ponto)
+    const origin = `${sortedItems[0].location.lat},${sortedItems[0].location.lng}`;
+    
+    // Destino (último ponto)
+    const destination = `${sortedItems[sortedItems.length - 1].location.lat},${sortedItems[sortedItems.length - 1].location.lng}`;
+    
+    // Waypoints (pontos intermediários)
+    const waypoints = sortedItems
+      .slice(1, -1)
+      .map(item => `${item.location.lat},${item.location.lng}`)
+      .join('|');
+    
+    // Construir URL do Google Maps
+    let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+    
+    if (waypoints) {
+      url += `&waypoints=${waypoints}`;
+    }
+    
+    url += '&travelmode=driving';
+    
+    return url;
+  };
 
   // Criar ícones customizados para cada tipo
   const createCustomIcon = (type: ItineraryItem['type'], color: string) => {
@@ -186,6 +216,17 @@ export default function TripMap({ items }: TripMapProps) {
           </Marker>
         ))}
       </MapContainer>
+
+      {/* Botão para abrir rota no Google Maps */}
+      <a
+        href={generateGoogleMapsUrl()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute top-4 right-4 bg-[#00A6FF] hover:bg-[#0095E8] text-white px-4 py-2 rounded-lg shadow-lg z-[1000] flex items-center gap-2 transition-colors"
+      >
+        <Navigation className="w-4 h-4" />
+        <span className="font-medium">Abrir Rota no Google Maps</span>
+      </a>
 
       {/* Legend */}
       <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 z-[1000]">

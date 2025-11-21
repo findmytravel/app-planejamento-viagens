@@ -39,6 +39,7 @@ export interface ItineraryItem {
   notes?: string;
   bookingReference?: string;
   order: number;
+  expenses?: ItemExpense[]; // Gastos específicos deste item
 }
 
 export interface Location {
@@ -59,6 +60,14 @@ export interface Expense {
   paidBy: string;
   splitBetween: string[];
   receipt?: string;
+}
+
+export interface ItemExpense {
+  id: string;
+  description: string;
+  amount: number;
+  paidBy: string;
+  date: string;
 }
 
 export interface List {

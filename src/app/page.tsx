@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, MapPin, Calendar, Users, DollarSign, Sparkles } from "lucide-react";
 import { mockTrips } from "@/lib/mock-data";
@@ -8,9 +8,46 @@ import { formatDate, getTripDuration, formatCurrency, getStatusColor, getStatusL
 import { Trip } from "@/lib/types";
 
 export default function Home() {
-  const [trips] = useState<Trip[]>(mockTrips);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+
+  // Carregar viagens do localStorage + mockTrips
+  useEffect(() => {
+    const loadTrips = () => {
+      try {
+        // Carregar viagens salvas do Travel Match
+        const savedTripsString = localStorage.getItem("myTrips");
+        const savedTrips = savedTripsString ? JSON.parse(savedTripsString) : [];
+        
+        // Converter viagens do Travel Match para o formato Trip
+        const convertedTrips: Trip[] = savedTrips.map((destination: any) => ({
+          id: destination.id,
+          name: destination.name,
+          destination: `${destination.name}, ${destination.country}`,
+          startDate: new Date().toISOString(), // Data atual como placeholder
+          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // +7 dias
+          status: 'planning' as const,
+          coverImage: destination.imageUrl,
+          totalBudget: destination.estimatedCost,
+          spentAmount: 0,
+          collaborators: [],
+          itemsCount: destination.itinerary?.length || 0,
+          description: destination.description,
+        }));
+
+        // Combinar com mockTrips
+        const allTrips = [...convertedTrips, ...mockTrips];
+        setTrips(allTrips);
+      } catch (error) {
+        console.error("Erro ao carregar viagens:", error);
+        // Em caso de erro, usar apenas mockTrips
+        setTrips(mockTrips);
+      }
+    };
+
+    loadTrips();
+  }, []);
 
   const filteredTrips = trips.filter(trip =>
     trip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -33,11 +70,17 @@ export default function Home() {
             </div>
             
             <div className="flex items-center gap-4">
-              <button className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              <button 
+                onClick={() => router.push("/new-trip")}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
                 <Sparkles className="w-4 h-4" />
                 Criar com IA
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00A6FF] to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <button 
+                onClick={() => router.push("/new-trip")}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00A6FF] to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
+              >
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">Nova Viagem</span>
               </button>
